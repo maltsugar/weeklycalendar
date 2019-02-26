@@ -13,6 +13,7 @@
 @interface GYWeeklyCalendarView()<UIScrollViewDelegate, GYWeeklyContainerViewDelegate>
 
 
+
 @property(nonatomic, strong) NSArray *currentWeekDates;
 @property(nonatomic, strong) NSArray *threeWeekDates;
 
@@ -65,36 +66,61 @@
     }
     return _indicator;
 }
-- (instancetype)initWithFrame:(CGRect)frame
+- (instancetype)initWithFrame:(CGRect)frame startWeekDay:(GYWeekDay)startDay
 {
     self = [super initWithFrame:frame];
     if (self) {
-        
-        _scrollView = [[UIScrollView alloc]init];
-        _scrollView.pagingEnabled = YES;
-        _scrollView.showsHorizontalScrollIndicator = NO;
-        _scrollView.delegate = self;
-        _scrollView.bounces = NO;
-        [self addSubview:_scrollView];
-        
-        
-        [self setupCurrentWeekDates];
-        
-        
-        NSMutableArray *temp = @[].mutableCopy;
-        for (int i = 0; i < 3; i++) {
-            GYWeeklyContainerView *weekView = [[GYWeeklyContainerView alloc]init];
-            weekView.delegate = self;
-            weekView.backgroundColor = [UIColor whiteColor];
-            [temp addObject:weekView];
-            [_scrollView addSubview:weekView];
-            
-        }
-        _weeklyViews = temp.copy;
-        
-        
+        _startDay = startDay;
+        [self setupViews];
     }
     return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder
+{
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        _startDay = GYWeekDaySun;
+        [self setupViews];
+    }
+    return self;
+}
+
+
+
+- (void)setupViews
+{
+    _scrollView = [[UIScrollView alloc]init];
+    _scrollView.pagingEnabled = YES;
+    _scrollView.showsHorizontalScrollIndicator = NO;
+    _scrollView.delegate = self;
+    _scrollView.bounces = NO;
+    [self addSubview:_scrollView];
+    
+    
+    [self setupCurrentWeekDates];
+    
+    
+    NSMutableArray *temp = @[].mutableCopy;
+    for (int i = 0; i < 3; i++) {
+        GYWeeklyContainerView *weekView = [[GYWeeklyContainerView alloc]init];
+        weekView.delegate = self;
+        weekView.backgroundColor = [UIColor whiteColor];
+        [temp addObject:weekView];
+        [_scrollView addSubview:weekView];
+        
+    }
+    _weeklyViews = temp.copy;
+}
+
+
+
+- (void)setStartDay:(GYWeekDay)startDay
+{
+    _startDay = startDay;
+    [self setNeedsLayout];
+    [self setupCurrentWeekDates];
+    [self layoutIfNeeded];
 }
 
 #pragma mark- GYWeeklyContainerViewDelegate
@@ -117,8 +143,10 @@
     NSMutableArray *arr = @[].mutableCopy;
     NSDate *date = [NSDate new];
     // 今天周几
-    NSInteger weekday = [date weekday];  // 1--7 表示周日                周一（2）放在第一位
-    NSInteger todayIndex =  (weekday - 2) >= 0 ? (weekday-2) : (weekday-2)+7;
+    NSInteger weekday = [date weekday];  // 1--7   1表示周日                周一（2）放在第一位
+    
+    int start = _startDay;
+    NSInteger todayIndex =  (weekday - start) >= 0 ? (weekday-start) : (weekday-start)+7;
     
     
     // 周一（weekday = 2）至今天的天数， i = 0 ，即是今天

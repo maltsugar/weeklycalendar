@@ -19,7 +19,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     CGFloat width = [UIScreen mainScreen].bounds.size.width;
-    GYWeeklyCalendarView *calendar = [[GYWeeklyCalendarView alloc]initWithFrame:CGRectMake(0, 80, width, 130)];
+    GYWeeklyCalendarView *calendar = [[GYWeeklyCalendarView alloc]initWithFrame:CGRectMake(0, 80, width, 130) startWeekDay:GYWeekDaySat];
     calendar.delegate = self;
     calendar.backgroundColor = [UIColor orangeColor];
     [self.view addSubview:calendar];
@@ -32,6 +32,15 @@
     dateLabel.font = [UIFont boldSystemFontOfSize:18.f];
     self.dateLabel = dateLabel;
     [calendar addSubview:dateLabel];
+    
+    
+    
+     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        
+               calendar.startDay = GYWeekDaySun;
+        
+            });
+   
 }
 - (void)calendarView:(GYWeeklyCalendarView *)calendar didSelectDay:(GYDayView *)dayview
 {
